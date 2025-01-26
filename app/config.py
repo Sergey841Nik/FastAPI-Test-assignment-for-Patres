@@ -16,8 +16,8 @@ class Settings(BaseSettings):
 
     @property
     def url(self):
-        return "sqlite+aiosqlite:///test_db.db"
-        # return f"{self.DB_URL}://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+        # return "sqlite+aiosqlite:///test_db.db"
+        return f"{self.DB_URL}://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
     echo: bool = True
     model_config = SettingsConfigDict(env_file=f"{BASE_DIR}/.env")
 

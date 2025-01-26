@@ -17,7 +17,6 @@ class Base(DeclarativeBase):
 class User(Base):
     __tablename__ = "users"
 
-    phone_number: Mapped[str] = mapped_column(unique=True, nullable=False)
     first_name: Mapped[str]
     last_name: Mapped[str]
     email: Mapped[str] = mapped_column(unique=True, nullable=False)
@@ -25,9 +24,8 @@ class User(Base):
     role_id: Mapped[int] = mapped_column(
         ForeignKey("roles.id"), default=1, server_default=text("1")
     )
-    role: Mapped["Role"] = relationship("Role", back_populates="users", lazy="joined")
+    role: Mapped["Role"] = relationship("Role", back_populates="users")
 
-    blogs: Mapped[list["Blog"]] = relationship(back_populates="user")
 
     def __repr__(self):
         return f"{self.__class__.__name__}(id={self.id})"
