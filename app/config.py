@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     private_key_path: Path = BASE_DIR / "cert" / "private.pem" 
     public_key_path: Path = BASE_DIR / "cert" / "public.pem"
     algorithms: str = "RS256" #алгоритм шифрования
-    access_token_expire_day: int = 30
+    access_token_expire_min: int = 15 #длительность жизни токена (для примера 15 минут)
 
 
 settings = Settings()

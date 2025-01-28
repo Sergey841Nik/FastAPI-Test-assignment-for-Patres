@@ -13,8 +13,10 @@ def hash_password(password: str) -> bytes:
     pwd_byts: bytes = password.encode() 
     return bcrypt.hashpw(pwd_byts, salt)  #создаём хэш пароля
 
-def validate_password(password: str, hash_password: bytes) -> bool:
-    return bcrypt.checkpw(password.encode(), hash_password) #проверяем хэш пароля
+def validate_password(password: str, hash_password: str) -> bool:
+    logger.info("Пароль из БД: %s" % hash_password)
+
+    return bcrypt.checkpw(password.encode(), hash_password.encode()) #проверяем хэш пароля
 
 #создаём jwt
 def encoded_jwt(
@@ -22,14 +24,14 @@ def encoded_jwt(
         private_key: str = settings.private_key_path.read_text(),
         algorithm: str = settings.algorithms,
         expire_timedelta: timedelta | None = None,
-        expire_days: int = settings.access_token_expire_day, 
+        expire_min: int = settings.access_token_expire_min, 
 ):
     to_encoded = payload.copy() 
     now = datetime.now(tz=timezone.utc)
     if expire_timedelta:
         expire = now + expire_timedelta
     else:
-        expire = now + timedelta(days=expire_days)
+        expire = now + timedelta(minutes=expire_min)
     to_encoded.update(exp=expire, iat=now,) 
     encoded = jwt.encode(to_encoded, private_key, algorithm=algorithm)
     return encoded
@@ -37,8 +39,8 @@ def encoded_jwt(
 #создаём расшифровщик
 def decoded_jwt(
         token: str | bytes,
-        public_key: str = settings.auth_jwt.public_key_path.read_text(),
-        algorithm: str = settings.auth_jwt.algorithms,
+        public_key: str = settings.public_key_path.read_text(),
+        algorithm: str = settings.algorithms,
 ) -> dict[str, str]:
     logger.info("token: %s" % token)
     

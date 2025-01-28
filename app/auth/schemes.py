@@ -5,7 +5,6 @@ from pydantic import (
     Field,
     ConfigDict,
     EmailStr,
-    computed_field,
     model_validator,
 )
 
@@ -45,7 +44,7 @@ class UserRegister(UserBase):
 
 
 class UserAddDB(UserBase):
-    password: bytes = Field(description="Пароль в формате HASH-строки")
+    password: str = Field(description="Пароль в формате HASH-строки")
 
 
 class UserAuth(EmailModel):
@@ -53,27 +52,7 @@ class UserAuth(EmailModel):
         min_length=5, max_length=50, description="Пароль, от 5 до 50 знаков"
     )
 
-class ChangeUserRole(EmailModel):
-    role_id: int = Field(description="Идентификатор роли")
-
-
-class RoleModel(BaseModel):
-    id: int = Field(description="Идентификатор роли")
-    name: str = Field(description="Название роли")
-    model_config = ConfigDict(from_attributes=True)
-
-class RoleAddDB(BaseModel):
-    name: str = Field(description="Название роли")
-
 
 class UserInfo(UserBase):
     id: int = Field(description="Идентификатор пользователя")
-    role: RoleModel = Field(exclude=True)
 
-    @computed_field
-    def role_name(self) -> str:
-        return self.role.name
-
-    @computed_field
-    def role_id(self) -> int:
-        return self.role.id

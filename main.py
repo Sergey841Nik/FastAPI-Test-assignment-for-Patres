@@ -4,8 +4,7 @@ import uvicorn
 
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
-
-from .auth.views import router as auth_router
+from app.auth.views import router as auth_router
 
 logger = getLogger()
 

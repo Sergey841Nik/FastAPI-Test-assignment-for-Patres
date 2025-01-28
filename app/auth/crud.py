@@ -55,3 +55,20 @@ async def add_users(session: AsyncSession, values: BaseModel):
     await session.commit()
     logger.info(f"Запись успешно добавлена.")
     return new_user
+
+async def get_all_users(session: AsyncSession, filters: BaseModel | None):
+    if filters:
+        filter_dict = filters.model_dump(exclude_unset=True)
+    else:
+        filter_dict = {}
+
+    logger.info("Поиск одной записи по фильтрам: %s" % filter_dict)
+
+    query = select(User).filter_by(**filter_dict)
+    result = await session.execute(query)
+    users = result.scalars().all()
+    if users:
+        logger.info("Запись найдена по фильтрам: %s" % filter_dict)
+    else:
+        logger.info("Запись не найдена по фильтрам: %s" % filter_dict)
+    return users
