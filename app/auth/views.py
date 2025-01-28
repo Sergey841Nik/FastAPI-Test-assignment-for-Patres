@@ -5,7 +5,8 @@ from fastapi import APIRouter, Depends, HTTPException, Response, status, Form
 
 from ..models.db_helper import db_helper
 from .schemes import EmailModel, UserRegister, UserAddDB, UserAuth, UserInfo
-from .crud import find_one_or_none_users, add_users, get_all_users
+# from .crud import find_one_or_none_users, add_users, get_all_users
+from .crud import UsersDAO
 from .auth_jwt import validate_auth_user, create_access_token
 from .dependencies import get_current_user, get_current_admin
 
@@ -18,7 +19,7 @@ logger = getLogger(__name__)
 async def register_users(
     user: UserRegister, session: AsyncSession = Depends(db_helper.session_dependency)
 ) -> dict:
-    find_user = await find_one_or_none_users(
+    find_user = await UsersDAO.find_one_or_none(
         session=session, filters=EmailModel(email=user.email)
     )
     if find_user:
@@ -29,7 +30,7 @@ async def register_users(
     user_dict = user.model_dump()
 
     del user_dict["confirm_password"]
-    await add_users(session=session, values=UserAddDB(**user_dict))
+    await UsersDAO.add(session=session, values=UserAddDB(**user_dict))
     return {"message": f"Вы успешно зарегистрированы!"}
 
 
@@ -65,4 +66,4 @@ async def all_users(
     session: AsyncSession = Depends(db_helper.session_dependency),
     user_data=Depends(get_current_admin),
 ) -> list[UserInfo]:
-    return await get_all_users(session=session, filters=None)  # type: ignore
+    return await UsersDAO.get_all(session=session, filters=None)  # type: ignore

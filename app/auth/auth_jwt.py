@@ -5,7 +5,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import EmailStr
 
-from .crud import find_one_or_none_users
+from .crud import UsersDAO
 from .utils import validate_password, encoded_jwt
 from .schemes import EmailModel
 from ..models.base import User
@@ -22,7 +22,7 @@ async def validate_auth_user(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Invalid email or password",
     )
-    user = await find_one_or_none_users(
+    user = await UsersDAO.find_one_or_none(
         session=session, filters=EmailModel(email=email)
     )
 

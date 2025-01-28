@@ -8,7 +8,7 @@ from ..models.base import User
 from ..models.db_helper import db_helper
 
 from .utils import decoded_jwt
-from .crud import find_one_or_none_by_id
+from .crud import UsersDAO
 
 logger = getLogger(__name__)
 
@@ -32,7 +32,7 @@ async def get_current_user(
                                detail=f'Токен не валидный')
 
     user_id: str = payload.get('sub') # type: ignore
-    user = await find_one_or_none_by_id(user_id=int(user_id), session=session)
+    user = await UsersDAO.find_one_or_none_by_id(user_id=int(user_id), session=session)
 
     logger.info("Найден пользователь %s" % user)
     
