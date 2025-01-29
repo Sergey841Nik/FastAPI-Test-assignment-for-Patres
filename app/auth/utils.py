@@ -1,12 +1,10 @@
 from datetime import datetime, timezone, timedelta
-from logging import getLogger
 
 import bcrypt
 import jwt
 
 from ..config import settings
 
-logger = getLogger(__name__)
 
 def hash_password(password: str) -> bytes:
     salt = bcrypt.gensalt() 
@@ -14,8 +12,6 @@ def hash_password(password: str) -> bytes:
     return bcrypt.hashpw(pwd_byts, salt)  #создаём хэш пароля
 
 def validate_password(password: str, hash_password: str) -> bool:
-    logger.info("Пароль из БД: %s" % hash_password)
-
     return bcrypt.checkpw(password.encode(), hash_password.encode()) #проверяем хэш пароля
 
 #создаём jwt
@@ -42,7 +38,6 @@ def decoded_jwt(
         public_key: str = settings.public_key_path.read_text(),
         algorithm: str = settings.algorithms,
 ) -> dict[str, str]:
-    logger.info("token: %s" % token)
     
     decoded = jwt.decode(token, public_key, algorithms=[algorithm])
     return decoded

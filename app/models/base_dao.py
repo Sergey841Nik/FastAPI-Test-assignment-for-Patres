@@ -15,20 +15,20 @@ class BaseDAO:
     model: Base
 
     @classmethod
-    async def find_one_or_none_by_id(cls, user_id: int, session: AsyncSession):
+    async def find_one_or_none_by_id(cls, values: int, session: AsyncSession):
         # Найти запись по ID
-        logger.info(f"Поиск {cls.model.__name__} с ID: {user_id}")
+        logger.info(f"Поиск {cls.model.__name__} с ID: {values}")
         try:
-            query = select(cls.model).filter_by(id=user_id)
+            query = select(cls.model).filter_by(id=values)
             result = await session.execute(query)
-            user = result.scalar_one_or_none()
-            if user:
-                logger.info(f"Запись с ID {user_id} найдена.")
+            value = result.scalar_one_or_none()
+            if value:
+                logger.info(f"Запись с ID {values} найдена.")
             else:
-                logger.info(f"Запись с ID {user_id} не найдена.")
-            return user
+                logger.info(f"Запись с ID {values} не найдена.")
+            return value
         except SQLAlchemyError as e:
-            logger.error(f"Ошибка при поиске записи с ID {user_id}: {e}")
+            logger.error(f"Ошибка при поиске записи с ID {values}: {e}")
             raise
 
     @classmethod
@@ -41,13 +41,13 @@ class BaseDAO:
         query = select(cls.model).filter_by(**filter_dict)
         result = await session.execute(query)
 
-        user = result.scalar_one_or_none()
+        value = result.scalar_one_or_none()
 
-        if user:
+        if value:
             logger.info("Запись найдена по фильтрам: %s" % filter_dict)
         else:
             logger.info("Запись не найдена по фильтрам: %s" % filter_dict)
-        return user
+        return value
 
     @classmethod
     async def add(cls, session: AsyncSession, values: BaseModel):
@@ -56,12 +56,12 @@ class BaseDAO:
 
         logger.info("Добавление записи с параметрами: %s" % values_dict["password"])
 
-        new_user = cls.model(**values_dict)
-        session.add(new_user)
+        new_value = cls.model(**values_dict)
+        session.add(new_value)
 
         await session.commit()
         logger.info(f"Запись успешно добавлена.")
-        return new_user
+        return new_value
 
     @classmethod
     async def get_all(cls, session: AsyncSession, filters: BaseModel | None):
@@ -75,9 +75,9 @@ class BaseDAO:
 
         query = select(cls.model).filter_by(**filter_dict)
         result = await session.execute(query)
-        users = result.scalars().all()
-        if users:
+        value = result.scalars().all()
+        if value:
             logger.info("Запись найдена по фильтрам: %s" % filter_dict)
         else:
             logger.info("Запись не найдена по фильтрам: %s" % filter_dict)
-        return users
+        return value

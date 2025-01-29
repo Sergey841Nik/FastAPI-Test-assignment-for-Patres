@@ -32,7 +32,7 @@ async def get_current_user(
                                detail=f'Токен не валидный')
 
     user_id: str = payload.get('sub') # type: ignore
-    user = await UsersDAO.find_one_or_none_by_id(user_id=int(user_id), session=session)
+    user = await UsersDAO.find_one_or_none_by_id(values=int(user_id), session=session)
 
     logger.info("Найден пользователь %s" % user)
     
