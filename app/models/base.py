@@ -1,6 +1,6 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
-from sqlalchemy import ForeignKey, text, TIMESTAMP, func
+from sqlalchemy import ForeignKey, String, Text, text, TIMESTAMP, func, UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
@@ -26,6 +26,8 @@ class User(Base):
     )
     role: Mapped["Role"] = relationship("Role", back_populates="users")
 
+    books: Mapped[list["Book"]] = relationship(secondary="handing_books_users", back_populates="users")
+
 
     def __repr__(self):
         return f"{self.__class__.__name__}(id={self.id})"
@@ -39,3 +41,43 @@ class Role(Base):
 
     def __repr__(self):
         return f"{self.__class__.__name__}(id={self.id}, name={self.name})"
+    
+
+class Book(Base):
+    __tablename__ = "books"
+
+    title: Mapped[str] = mapped_column(unique=True, nullable=False)
+    description: Mapped[str] = mapped_column(Text)
+    author: Mapped[int] = mapped_column(ForeignKey("authors.id"), nullable=False)
+    genre: Mapped[str] = mapped_column(String(20))
+    amount: Mapped[int] = mapped_column(default=0, server_default="0")
+
+    users: Mapped[list["User"]] = relationship(
+        secondary="handing_books_users", back_populates="books"
+    )
+
+
+class Author(Base):
+    __tablename__ = "authors"
+    name: Mapped[str] = mapped_column(String(20), unique=True, nullable=False)
+    bio: Mapped[str | None]
+    date_of_birth: Mapped[str | None]
+
+
+class HandingBookUser(Base):
+    __tablename__ = "handing_books_users"
+    __table_args__ = (UniqueConstraint("book_id", "user_id", name="uq_user_book"),)
+
+    book_id: Mapped[int] = mapped_column(
+        ForeignKey("books.id", ondelete="CASCADE"), nullable=False
+    )
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+
+    created_at: Mapped[datetime] = mapped_column(TIMESTAMP, server_default=func.now())
+    book_return_date: Mapped[datetime | None] = mapped_column(nullable=True)
+
+    def calculate_return_date(self):
+        if self.book_return_date is None:
+            self.book_return_date = self.created_at + timedelta(days=7)

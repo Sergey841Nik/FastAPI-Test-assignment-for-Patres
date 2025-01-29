@@ -68,7 +68,7 @@ async def change_role(
     del user_dict["confirm_password"]
 
     await UsersDAO.update(
-        session=session, user=user_data, values=UserRegister(**user_dict)
+        session=session, user=user_data, values=UserAddDB(**user_dict)
     )
     await session.commit()
 
