@@ -39,6 +39,7 @@ async def get_current_user(
     return user
 
 async def get_current_admin(user: User = Depends(get_current_user)):
+    logger.info("Найден пользователь %s" % user)
     if user.role_id == 2:
         return user
     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,

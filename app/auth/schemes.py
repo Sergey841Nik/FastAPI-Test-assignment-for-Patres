@@ -63,3 +63,6 @@ class UserInfo(UserBase):
     id: int = Field(description="Идентификатор пользователя")
     books: list[BooksInfo] = Field(description="Список книг")
 
+class UserInfoAll(UserBase):
+    id: int = Field(description="Идентификатор пользователя")
+

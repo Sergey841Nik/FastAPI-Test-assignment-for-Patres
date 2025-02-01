@@ -1,11 +1,11 @@
 from logging import getLogger
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status, Form
 
 
 from ..models.db_helper import db_helper
-from .schemes import EmailModel, UserRegister, UserAddDB, UserAuth, UserInfo
+from .schemes import EmailModel, UserRegister, UserAddDB, UserAuth, UserInfo, UserInfoAll
 
 from .crud import UsersDAO
 from .auth_jwt import validate_auth_user, create_access_token
@@ -18,7 +18,8 @@ logger = getLogger(__name__)
 
 @router.post("/register/", status_code=status.HTTP_201_CREATED)
 async def register_users(
-    user: UserRegister, session: AsyncSession = Depends(db_helper.session_dependency)
+    user: UserRegister = Form(), 
+    session: AsyncSession = Depends(db_helper.session_dependency)
 ) -> dict:
     find_user = await UsersDAO.find_one_or_none(
         session=session, filters=EmailModel(email=user.email)
@@ -39,7 +40,7 @@ async def register_users(
 @router.post("/login/")
 async def auth_user(
     response: Response,
-    user: UserAuth,
+    user: UserAuth = Form(),
     session: AsyncSession = Depends(db_helper.session_dependency),
 ) -> dict:
 
@@ -60,7 +61,7 @@ async def logout_user(response: Response):
 
 @router.put("/change_info_user_self/")
 async def change_role(
-    user: UserRegister,
+    user: UserRegister = Form(),
     session: AsyncSession = Depends(db_helper.session_dependency),
     user_data=Depends(get_current_user),
 ):
@@ -68,7 +69,7 @@ async def change_role(
     del user_dict["confirm_password"]
 
     await UsersDAO.update(
-        session=session, user=user_data, values=UserAddDB(**user_dict)
+        session=session, base=user_data, values=UserAddDB(**user_dict)
     )
     await session.commit()
 
@@ -85,9 +86,9 @@ async def get_me(
 
 
 
-@router.get("/all_users/")
+@router.get("/all_users/", response_model=list[UserInfoAll])
 async def all_users(
+    user_data = Depends(get_current_admin),
     session: AsyncSession = Depends(db_helper.session_dependency),
-    user_data=Depends(get_current_admin),
-) -> list[UserInfo]:
-    return await UsersDAO.get_all(session=session, filters=None)  # type: ignore
+) -> list[UserInfoAll]:
+    return await UsersDAO.get_all(session=session)  # type: ignore

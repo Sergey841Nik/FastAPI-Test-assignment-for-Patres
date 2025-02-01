@@ -67,22 +67,16 @@ class BaseDAO:
             await session.rollback()
 
     @classmethod
-    async def get_all(cls, session: AsyncSession, filters: BaseModel | None):
+    async def get_all(cls, session: AsyncSession):
         # найти всё
-        if filters:
-            filter_dict = filters.model_dump(exclude_unset=True)
-        else:
-            filter_dict = {}
 
-        logger.info("Поиск одной записи по фильтрам: %s" % filter_dict)
-
-        query = select(cls.model).filter_by(**filter_dict)
+        query = select(cls.model)
         result = await session.execute(query)
         value = result.scalars().all()
         if value:
-            logger.info("Запись найдена по фильтрам: %s" % filter_dict)
+            logger.info("Запись найдена")
         else:
-            logger.info("Запись не найдена по фильтрам: %s" % filter_dict)
+            logger.info("Запись не найдена")
         return value
 
     @classmethod
