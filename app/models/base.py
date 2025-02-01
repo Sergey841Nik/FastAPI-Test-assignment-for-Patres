@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from sqlalchemy import ForeignKey, String, Text, text, TIMESTAMP, func, UniqueConstraint
+from sqlalchemy import ForeignKey, String, Text, text, TIMESTAMP, func, UniqueConstraint, CheckConstraint
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
@@ -45,6 +45,7 @@ class Role(Base):
 
 class Book(Base):
     __tablename__ = "books"
+    __table_args__ = (UniqueConstraint("title", "author", name="uq_book"), CheckConstraint('amount >= 0', name='check_amount'))
 
     title: Mapped[str] = mapped_column(unique=True, nullable=False)
     description: Mapped[str] = mapped_column(Text)
@@ -74,10 +75,7 @@ class HandingBookUser(Base):
     user_id: Mapped[int] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
+    amount: Mapped[int] = mapped_column(default=1, server_default="1")
 
     created_at: Mapped[datetime] = mapped_column(TIMESTAMP, server_default=func.now())
-    book_return_date: Mapped[datetime | None] = mapped_column(nullable=True)
-
-    def calculate_return_date(self):
-        if self.book_return_date is None:
-            self.book_return_date = self.created_at + timedelta(days=7)
+    book_return_date: Mapped[datetime | None]

@@ -24,7 +24,7 @@ def get_token(request: Request) -> str:
 async def get_current_user(
         token: str = Depends(get_token),
         session: AsyncSession = Depends(db_helper.session_dependency),
-):
+) -> User:
     try:
         payload = decoded_jwt(token)
     except InvalidTokenError:

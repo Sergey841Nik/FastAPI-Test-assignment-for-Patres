@@ -1,7 +1,8 @@
 from logging import getLogger
 
 from pydantic import BaseModel
-from sqlalchemy import update
+from sqlalchemy import update, select
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -16,17 +17,11 @@ class UsersDAO(BaseDAO):
     model: User = User
 
     @classmethod
-    async def update(cls, session: AsyncSession, user: User, values: BaseModel):
-        # Обновить записи по фильтрам
-        for name, value in values.model_dump(exclude_unset=True).items():
-            setattr(user, name, value)
+    async def get_user_with_books(cls, user_id, session: AsyncSession) -> list[User]:
+        query = (select(User).options(selectinload(User.books),).order_by(User.id)).filter_by(id=user_id)
+        users = await session.scalars(query)
+        return list(users)
 
-        try:
-            await session.flush()
-            logger.info(f"Обновлена информация для записи {cls.model.email}.")
-        except SQLAlchemyError as e:
-            logger.error(f"Ошибка при обновлении записей: {e}")
-            await session.rollback()
 
     # @classmethod
     # async def update(cls, session: AsyncSession, user_id: int, values: BaseModel):

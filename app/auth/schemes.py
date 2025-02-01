@@ -52,7 +52,14 @@ class UserAuth(EmailModel):
         min_length=5, max_length=50, description="Пароль, от 5 до 50 знаков"
     )
 
+class BooksInfo(BaseModel):
+    author: int
+    title: str
+    description: str
+    genre: str
+    
 
 class UserInfo(UserBase):
     id: int = Field(description="Идентификатор пользователя")
+    books: list[BooksInfo] = Field(description="Список книг")
 

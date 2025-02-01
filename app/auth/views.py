@@ -1,13 +1,12 @@
 from logging import getLogger
-from typing import Annotated
+
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import APIRouter, Depends, HTTPException, Response, status, Form
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 
 
 from ..models.db_helper import db_helper
 from .schemes import EmailModel, UserRegister, UserAddDB, UserAuth, UserInfo
 
-# from .crud import find_one_or_none_users, add_users, get_all_users
 from .crud import UsersDAO
 from .auth_jwt import validate_auth_user, create_access_token
 from .dependencies import get_current_user, get_current_admin
@@ -33,6 +32,7 @@ async def register_users(
 
     del user_dict["confirm_password"]
     await UsersDAO.add(session=session, values=UserAddDB(**user_dict))
+    await session.commit()
     return {"message": f"Вы успешно зарегистрированы!"}
 
 
@@ -75,9 +75,14 @@ async def change_role(
     return {"message": "Данные пользователя изменены"}
 
 
-@router.get("/me/")
-async def get_me(user_data=Depends(get_current_user)) -> UserInfo:
-    return UserInfo.model_validate(user_data)
+@router.get("/me/", response_model=UserInfo)
+async def get_me(
+    user_data = Depends(get_current_user),
+    session: AsyncSession = Depends(db_helper.session_dependency),
+) -> UserInfo:
+    result = await UsersDAO.get_user_with_books(user_id=user_data.id, session=session)
+    return result[0]
+
 
 
 @router.get("/all_users/")

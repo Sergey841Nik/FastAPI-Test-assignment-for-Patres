@@ -5,6 +5,7 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 from app.auth.views import router as auth_router
+from app.api.views import router as api_router
 
 logger = getLogger()
 
@@ -17,6 +18,7 @@ basicConfig(level=INFO, format=FORMAT, handlers=[stream_handler])
 app = FastAPI(default_response_class=ORJSONResponse)
 
 app.include_router(auth_router)
+app.include_router(api_router)
 
 @app.get("/")
 def home_page():

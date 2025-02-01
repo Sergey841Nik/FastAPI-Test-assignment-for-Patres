@@ -54,14 +54,17 @@ class BaseDAO:
         # Добавить одну запись
         values_dict = values.model_dump(exclude_unset=True)
 
-        logger.info("Добавление записи с параметрами: %s" % values_dict["password"])
+        logger.info("Добавление записи с параметрами: %s" % values_dict)
 
         new_value = cls.model(**values_dict)
         session.add(new_value)
-
-        await session.commit()
-        logger.info(f"Запись успешно добавлена.")
-        return new_value
+        try:
+            await session.flush()
+            logger.info("Запись успешно добавлена.")
+            return new_value
+        except SQLAlchemyError as e:
+            logger.error(f"Ошибка при добавлении записей: {e}")
+            await session.rollback()
 
     @classmethod
     async def get_all(cls, session: AsyncSession, filters: BaseModel | None):
@@ -81,3 +84,16 @@ class BaseDAO:
         else:
             logger.info("Запись не найдена по фильтрам: %s" % filter_dict)
         return value
+
+    @classmethod
+    async def update(cls, session: AsyncSession, base: Base, values: BaseModel):
+        # Обновить записи по фильтрам
+        for key, value in values.model_dump(exclude_unset=True).items():
+            setattr(base, key, value)
+
+        try:
+            await session.flush()
+            logger.info("Обновлена информация для %s." % cls.model)
+        except SQLAlchemyError as e:
+            logger.error("Ошибка при обновлении записей: %s" % e)
+            await session.rollback()
