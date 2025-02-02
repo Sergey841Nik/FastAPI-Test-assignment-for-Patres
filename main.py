@@ -15,7 +15,7 @@ stream_handler = StreamHandler()
 stream_handler.setLevel(INFO)
 basicConfig(level=INFO, format=FORMAT, handlers=[stream_handler])
 
-app = FastAPI(default_response_class=ORJSONResponse)
+app = FastAPI(default_response_class=ORJSONResponse) # ORJSONResponse вроде как ускоряет работу
 
 app.include_router(auth_router)
 app.include_router(api_router)

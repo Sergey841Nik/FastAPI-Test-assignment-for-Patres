@@ -73,7 +73,7 @@ class BookDAO(BaseDAO):
         
         filter_str = " & ".join(filters) if filters else "no filters"
 
-        logger.info("Страница %s из %d книг, фильтр: %s." % (page, len(books), filter_str))
+        logger.info("Страница %s c %d книг, фильтр: %s." % (page, len(books), filter_str))
 
         # Формирование результата
         return {

@@ -2,7 +2,7 @@ from logging import getLogger
 from datetime import datetime, timedelta
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 
 from ..models.db_helper import db_helper
@@ -90,6 +90,22 @@ async def get_user_books(
     book_id: int,
     admin = Depends(get_current_admin),
     session: AsyncSession = Depends(db_helper.session_dependency),
-):
+) -> BooksInfo:
     result = await BookDAO.get_books_with_users(book_id=book_id, session=session)
+    if not result:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Такой книги нет",
+        )
     return result[0]
+
+@router.get("/books/")
+async def get_book_info(
+        author_id: int | None = None,
+        page: int = Query(1, ge=1, description="Номер страницы"),
+        page_size: int = Query(10, ge=10, le=50, description="Записей на странице"),
+        session: AsyncSession = Depends(db_helper.session_dependency),
+) -> dict:
+    result = await BookDAO.get_book_list(session=session, author_id=author_id, page=page,
+                                             page_size=page_size)
+    return result
