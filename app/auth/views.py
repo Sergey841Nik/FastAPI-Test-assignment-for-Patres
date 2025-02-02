@@ -18,7 +18,7 @@ logger = getLogger(__name__)
 
 @router.post("/register/", status_code=status.HTTP_201_CREATED)
 async def register_users(
-    user: UserRegister = Form(), 
+    user: UserRegister, 
     session: AsyncSession = Depends(db_helper.session_dependency)
 ) -> dict:
     find_user = await UsersDAO.find_one_or_none(
@@ -40,7 +40,7 @@ async def register_users(
 @router.post("/login/")
 async def auth_user(
     response: Response,
-    user: UserAuth = Form(),
+    user: UserAuth,
     session: AsyncSession = Depends(db_helper.session_dependency),
 ) -> dict:
 

@@ -1,4 +1,5 @@
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
+from sqlalchemy.pool import NullPool
 
 from app.config import settings
 
@@ -8,6 +9,7 @@ class DBHelper:
         self.engine = create_async_engine(
             url=url,
             echo=echo,
+            poolclass=NullPool,
         )
         self.session_factory = async_sessionmaker(
             bind=self.engine,
