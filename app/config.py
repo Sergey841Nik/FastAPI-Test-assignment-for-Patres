@@ -7,7 +7,6 @@ BASE_DIR = Path(__file__).parent.parent
 
 class Settings(BaseSettings):
     # db config
-    DB_URL: str
     DB_HOST: str
     DB_PORT: int
     DB_USER: str
@@ -17,7 +16,7 @@ class Settings(BaseSettings):
     @property
     def url(self):
         # return "sqlite+aiosqlite:///test_db.db"
-        return f"{self.DB_URL}://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+        return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
     echo: bool = True
     model_config = SettingsConfigDict(env_file=f"{BASE_DIR}/.env")
 
