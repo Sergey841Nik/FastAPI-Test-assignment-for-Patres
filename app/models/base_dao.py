@@ -63,7 +63,7 @@ class BaseDAO:
             logger.info("Запись успешно добавлена.")
             return new_value
         except SQLAlchemyError as e:
-            logger.error(f"Ошибка при добавлении записей: {e}")
+            logger.error("Ошибка при добавлении записей: %s" % e)
             await session.rollback()
 
     @classmethod

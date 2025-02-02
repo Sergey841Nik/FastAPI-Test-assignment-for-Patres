@@ -5,7 +5,14 @@ from fastapi import APIRouter, Depends, HTTPException, Response, status, Form
 
 
 from ..models.db_helper import db_helper
-from .schemes import EmailModel, UserRegister, UserAddDB, UserAuth, UserInfo, UserInfoAll
+from .schemes import (
+    EmailModel,
+    UserRegister,
+    UserAddDB,
+    UserAuth,
+    UserInfo,
+    UserInfoAll,
+)
 
 from .crud import UsersDAO
 from .auth_jwt import validate_auth_user, create_access_token
@@ -18,8 +25,7 @@ logger = getLogger(__name__)
 
 @router.post("/register/", status_code=status.HTTP_201_CREATED)
 async def register_users(
-    user: UserRegister, 
-    session: AsyncSession = Depends(db_helper.session_dependency)
+    user: UserRegister, session: AsyncSession = Depends(db_helper.session_dependency)
 ) -> dict:
     find_user = await UsersDAO.find_one_or_none(
         session=session, filters=EmailModel(email=user.email)
@@ -78,17 +84,16 @@ async def change_role(
 
 @router.get("/me/", response_model=UserInfo)
 async def get_me(
-    user_data = Depends(get_current_user),
+    user_data=Depends(get_current_user),
     session: AsyncSession = Depends(db_helper.session_dependency),
 ) -> UserInfo:
     result = await UsersDAO.get_user_with_books(user_id=user_data.id, session=session)
     return result[0]
 
 
-
 @router.get("/all_users/", response_model=list[UserInfoAll])
 async def all_users(
-    user_data = Depends(get_current_admin),
+    user_data=Depends(get_current_admin),
     session: AsyncSession = Depends(db_helper.session_dependency),
 ) -> list[UserInfoAll]:
     return await UsersDAO.get_all(session=session)  # type: ignore
