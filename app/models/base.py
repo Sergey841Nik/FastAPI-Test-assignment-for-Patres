@@ -53,6 +53,8 @@ class Book(Base):
     genre: Mapped[str] = mapped_column(String(20))
     amount: Mapped[int] = mapped_column(default=0, server_default="0")
 
+    authors: Mapped["Author"] = relationship(back_populates="books")
+
     users: Mapped[list["User"]] = relationship(
         secondary="handing_books_users", back_populates="books"
     )
@@ -63,6 +65,8 @@ class Author(Base):
     name: Mapped[str] = mapped_column(String(20), unique=True, nullable=False)
     bio: Mapped[str | None]
     date_of_birth: Mapped[str | None]
+
+    books: Mapped[list["Book"]] = relationship(back_populates="authors")
 
 
 class HandingBookUser(Base):
